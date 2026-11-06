@@ -8,6 +8,7 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
+    "sync:ai": "npx -y github:picktsh/ai-protocol",
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
