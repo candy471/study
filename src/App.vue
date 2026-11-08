@@ -4,6 +4,9 @@
 
     <!-- 顶部控制区：布局用 UnoCSS 原子类，控件用 naive-ui -->
     <NCard class="w-full max-w-850px" size="small" title="仿真参数">
+      <template #header-extra>
+        <NButton size="small" secondary @click="resetParams">重置</NButton>
+      </template>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
         <div class="flex flex-col gap-2">
           <NText depth="3">仿真模式</NText>
@@ -69,14 +72,17 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick, computed } from 'vue'
-import { NCard, NSelect, NSlider, NText } from 'naive-ui'
+import { NButton, NCard, NSelect, NSlider, NText } from 'naive-ui'
+
+// 滑块默认值：ref 初值与“重置”按钮共用同一份，避免数字写两遍后走样
+const DEFAULT_PARAMS = { wavelength: 550, d: 0.5, a: 0.2, N: 5 }
 
 // 1. 定义响应式参数
 const mode = ref('double') // 当前模式：double, single, multi
-const wavelength = ref(550)
-const d = ref(0.5) // 双缝间距 或 光栅常数
-const a = ref(0.2) // 单缝宽度
-const N = ref(5)   // 多缝的缝数
+const wavelength = ref(DEFAULT_PARAMS.wavelength)
+const d = ref(DEFAULT_PARAMS.d) // 双缝间距 或 光栅常数
+const a = ref(DEFAULT_PARAMS.a) // 单缝宽度
+const N = ref(DEFAULT_PARAMS.N) // 多缝的缝数
 const canvasRef = ref(null)
 const chartRef = ref(null) // 光强分布折线图画布
 const intensities = ref([]) // 每个像素列对应的光强，范围 0~1
@@ -438,6 +444,14 @@ const onPointerUp = (event) => {
 // 10. 模式切换走 0.3s 平滑过渡（只插值亮度，不动物理公式）；滑块拖动仍即时响应
 watch(mode, () => drawSimulation(true))
 watch([wavelength, d, a, N], () => drawSimulation())
+
+// 重置按钮：所有滑块回到默认值，watch 会一次性触发重算重绘（Vue 批量合帧）
+const resetParams = () => {
+  wavelength.value = DEFAULT_PARAMS.wavelength
+  d.value = DEFAULT_PARAMS.d
+  a.value = DEFAULT_PARAMS.a
+  N.value = DEFAULT_PARAMS.N
+}
 
 // 11. 初始化
 onMounted(() => {
